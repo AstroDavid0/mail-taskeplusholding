@@ -1,8 +1,6 @@
 # Configuración manual por gestor
 
-Sirve para **todos** los clientes, pero los valores dependen del dominio. La tabla exacta por
-dominio está en la portada (`index.html`, sección 01) y en `domains.js`. Referencia del dominio
-principal:
+Datos para **todos** los clientes y para cualquier buzón del dominio:
 
 | Campo | Valor |
 |---|---|
@@ -13,13 +11,7 @@ principal:
 | SMTP | `chocobo.mxrouting.net` · puerto **465** · SSL/TLS |
 | Autenticación SMTP | obligatoria, misma contraseña |
 
-Para cualquier otro dominio del grupo:
-
-```bash
-node scripts/inspect-domain.mjs otrodominio.com
-```
-
-Eso te da sus servidores, puertos y una entrada lista para `domains.js`.
+También están en la portada (`index.html`, sección 01).
 
 Si un cliente no acepta el 465, el 587 con STARTTLS también funciona en MXroute.
 

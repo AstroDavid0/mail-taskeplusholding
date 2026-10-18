@@ -1,115 +1,91 @@
-# Registros DNS — 4 dominios en MXroute
+# Registros DNS — taskeplusholding.com
 
-Verificado el 2026-10-18 con `node scripts/inspect-domain.mjs`:
+DNS en **Namecheap** (`dns1/dns2.registrar-servers.com`). Estado verificado:
 
-| Dominio | MX | IMAP/SMTP | Certificado | DKIM | SPF | DMARC |
-|---|---|---|---|---|---|---|
-| taskeplusholding.com | chocobo.mxrouting.net | 993 / 465 ✅ | ✅ | ✅ `x` | ✅ | ❌ falta |
-| taskeplusholdingllc.com | chocobo.mxrouting.net | 993 / 465 ✅ | ✅ | ✅ `x` | ✅ | ❌ falta |
-| epluservices.com | chocobo.mxrouting.net | 993 / 465 ✅ | ✅ | ✅ `x` | ✅ | ❌ falta |
-| vencox.com | chocobo.mxrouting.net | 993 / 465 ✅ | ✅ | ✅ `x` | ✅ | ❌ falta |
+| Registro | Estado |
+|---|---|
+| `MX` 10 `chocobo.mxrouting.net` / 20 `chocobo-relay.mxrouting.net` | ✅ correcto, no tocar |
+| `SPF` `v=spf1 include:mxroute.com -all` | ✅ correcto, no tocar |
+| DKIM selector `x` | ✅ presente, no tocar |
+| `CNAME autoconfig` → `astrodavid0.github.io` | ✅ funciona (Thunderbird, K-9, FairEmail) |
+| `CNAME autodiscover` | ❌ no existe → Outlook va a mano |
+| `TXT _dmarc` | ❌ no existe |
 
-Los cuatro usan el **mismo servidor** (`chocobo.mxrouting.net`, certificado válido, puerto 587 también
-abierto). Ninguno tiene hostname propio tipo `mail.dominio.com`, así que no hay nada que inventar:
-el servidor del certificado es el servidor de conexión.
+## 1. Autodiscover (lo único que falta para que Outlook funcione solo)
 
-DNS de los cuatro: **Namecheap** (`dns1/dns2.registrar-servers.com`). No toques `MX`, `SPF` ni DKIM.
+> GitHub Pages **no puede** servir esto: contesta **405 a POST**, y Outlook usa POST.
+> Verificado. Necesita un endpoint con funciones; la ruta más simple es Netlify
+> (gratis, certificado TLS automático, sin mover el DNS).
 
-## 1. Estado actual de los registros de autoconfiguración
+| Tipo  | Host           | Valor                  |
+|-------|----------------|------------------------|
+| CNAME | `autodiscover` | `<sitio>.netlify.app.` |
 
-| Dominio | `CNAME autoconfig` | `CNAME autodiscover` |
-|---|---|---|
-| taskeplusholding.com | ✅ `astrodavid0.github.io` (funciona) | ❌ no existe |
-| taskeplusholdingllc.com | ❌ no existe | ❌ no existe |
-| epluservices.com | ❌ no existe | ❌ no existe |
-| vencox.com | ❌ no existe | ❌ no existe |
+Pasos:
 
-## 2. Lo que hay que crear (Namecheap → Advanced DNS)
-
-> ⚠️ GitHub Pages **no** sirve aquí: contesta **405 a POST** (lo que usa Outlook) y admite **un solo**
-> dominio personalizado por sitio (probado: otro host → fallo de TLS y 404). Todo lo nuevo va a
-> **Netlify**, que sí acepta POST y permite N dominios con certificado propio en un único sitio.
-
-| Registro | Host | Tipo | Valor | TTL |
-|---|---|---|---|---|
-| taskeplusholding.com | `autodiscover` | CNAME | `<sitio>.netlify.app.` | Automatic |
-| taskeplusholdingllc.com | `autoconfig` | CNAME | `<sitio>.netlify.app.` | Automatic |
-| taskeplusholdingllc.com | `autodiscover` | CNAME | `<sitio>.netlify.app.` | Automatic |
-| epluservices.com | `autoconfig` | CNAME | `<sitio>.netlify.app.` | Automatic |
-| epluservices.com | `autodiscover` | CNAME | `<sitio>.netlify.app.` | Automatic |
-| vencox.com | `autoconfig` | CNAME | `<sitio>.netlify.app.` | Automatic |
-| vencox.com | `autodiscover` | CNAME | `<sitio>.netlify.app.` | Automatic |
-
-`<sitio>` es el nombre que te dé Netlify (p. ej. `taskeplus-mail.netlify.app`). Son **7 registros**.
-
-`autoconfig.taskeplusholding.com` se queda como está en GitHub Pages: funciona, no cuesta nada y da
-redundancia si Netlify fallara.
-
-### Passos en Netlify
-
-1. *Add new site → Import an existing project* → este repo (build vacío, **publish `.`**).
-   Ya trae `netlify.toml` y `netlify/edge-functions/autodiscover.mjs`.
-2. *Domain management → Add a domain*, uno por uno estos 7 nombres:
-   - `autodiscover.taskeplusholding.com`
-   - `autoconfig.taskeplusholdingllc.com`, `autodiscover.taskeplusholdingllc.com`
-   - `autoconfig.epluservices.com`, `autodiscover.epluservices.com`
-   - `autoconfig.vencox.com`, `autodiscover.vencox.com`
-3. Crea los CNAME de la tabla. Netlify emite un certificado Let's Encrypt por nombre en minutos.
-4. Verifica (debe devolver el XML con el `LoginName` correcto):
+1. Netlify → *Add new site → Import an existing project* → este repo
+   (ya trae `netlify.toml` y `netlify/edge-functions/autodiscover.mjs`; build vacío, publish `.`).
+   ⚠️ Tiene que ser *Import from Git*: con "Netlify Drop" no se despliega la edge function.
+2. *Domain management → Add a domain* → `autodiscover.taskeplusholding.com`.
+3. Crear el `CNAME` de la tabla. Netlify emite el certificado en minutos.
+4. Verificar:
 
 ```bash
-for d in taskeplusholding.com taskeplusholdingllc.com epluservices.com vencox.com; do
-  echo "== $d"
-  curl -s -o /dev/null -w "  autoconfig   %{http_code}\n" "https://autoconfig.$d/mail/config-v1.1.xml"
-  curl -s -X POST "https://autodiscover.$d/autodiscover/autodiscover.xml" \
-    -H 'Content-Type: text/xml' \
-    -d "<Autodiscover><Request><EMailAddress>ana@$d</EMailAddress></Request></Autodiscover>" \
-    | grep -o "<LoginName>[^<]*</LoginName>"
-done
+curl -s -X POST https://autodiscover.taskeplusholding.com/autodiscover/autodiscover.xml \
+  -H 'Content-Type: text/xml' \
+  -d '<Autodiscover><Request><EMailAddress>ana@taskeplusholding.com</EMailAddress></Request></Autodiscover>'
 ```
 
-## 3. Recomendados por dominio (5 minutos cada uno)
+Debe devolver el XML con `<LoginName>ana@taskeplusholding.com</LoginName>`.
 
-### DMARC — falta en los cuatro
+Si no se publica, no pasa nada grave: Outlook/Windows Mail se configuran a mano con los datos de la
+portada (`index.html`, sección 01). Thunderbird, K-9, FairEmail y Apple no dependen de esto.
 
-Empezar en `p=none` (solo informa) y endurecer cuando lleguen los informes:
+## 2. Recomendados
 
-| Dominio | Host | Tipo | Valor |
-|---|---|---|---|
-| taskeplusholding.com | `_dmarc` | TXT | `v=DMARC1; p=none; rua=mailto:dmarc@taskeplusholding.com; adkim=r; aspf=r; pct=100` |
-| taskeplusholdingllc.com | `_dmarc` | TXT | `v=DMARC1; p=none; rua=mailto:dmarc@taskeplusholdingllc.com; adkim=r; aspf=r; pct=100` |
-| epluservices.com | `_dmarc` | TXT | `v=DMARC1; p=none; rua=mailto:dmarc@epluservices.com; adkim=r; aspf=r; pct=100` |
-| vencox.com | `_dmarc` | TXT | `v=DMARC1; p=none; rua=mailto:dmarc@vencox.com; adkim=r; aspf=r; pct=100` |
+### DMARC (falta) — lo más importante para un correo de empresa
 
-(El buzón `dmarc@` debe existir o ser un alias que reciba; si no, pon tu dirección real.)
+| Host     | Tipo | Valor |
+|----------|------|-------|
+| `_dmarc` | TXT  | `v=DMARC1; p=none; rua=mailto:dmarc@taskeplusholding.com; adkim=r; aspf=r; pct=100` |
 
-### SRV y TXT de descubrimiento
+Empezar en `p=none` (solo informa). Tras unas semanas de informes, subir a `p=quarantine` y luego a
+`p=reject`. El buzón `dmarc@` debe existir o ser un alias que reciba.
 
-Por cada dominio, sustituyendo `<d>`:
+### Pistas de descubrimiento opcionales
 
 | Host (Namecheap: Service / Protocol) | Prioridad | Peso | Puerto | Target |
 |---|---|---|---|---|
-| `_imaps` / `_tcp` | 0 | 0 | 993 | `chocobo.mxrouting.net.` |
-| `_submissions` / `_tcp` | 0 | 0 | 465 | `chocobo.mxrouting.net.` |
-| `_autodiscover` / `_tcp` | 0 | 0 | 443 | `autodiscover.<d>.` |
+| `_imaps` / `_tcp`        | 0 | 0 | 993 | `chocobo.mxrouting.net.` |
+| `_submissions` / `_tcp`  | 0 | 0 | 465 | `chocobo.mxrouting.net.` |
+| `_autodiscover` / `_tcp` | 0 | 0 | 443 | `autodiscover.taskeplusholding.com.` |
 
 | Host | Tipo | Valor |
-|---|---|---|
-| `@` | TXT | `mailconf=https://autoconfig.<d>/mail/config-v1.1.xml` |
+|------|------|-------|
+| `@`  | TXT  | `mailconf=https://autoconfig.taskeplusholding.com/mail/config-v1.1.xml` |
 
-En Namecheap, los SRV van con "Type: SRV Record" y el Host escrito completo (`_imaps._tcp`).
+## 3. Verificación
+
+```bash
+cd ~/mail-taskeplusholding
+node scripts/verify-domains.mjs                 # estado completo de un vistazo
+node scripts/build.mjs --check                  # archivos sincronizados con domains.js
+
+dig +short CNAME autoconfig.taskeplusholding.com
+dig +short CNAME autodiscover.taskeplusholding.com
+dig +short TXT _dmarc.taskeplusholding.com
+```
+
+Con `autodiscover` publicado y el certificado emitido, `verify-domains.mjs` debe mostrar
+`1/1 dominios funcionando por completo`.
 
 ## 4. Notas
 
-- Cada nombre nuevo necesita **su propio certificado**. Si creas el CNAME antes de añadir el dominio
-  en Netlify, verás error de TLS hasta que se emita (minutos).
-- `taskeplusholdingllc.com` y `epluservices.com` tienen el apex en una página de parking de Namecheap
-  (`192.64.119.x`) y `vencox.com` en AWS. No afecta al correo ni a esto, pero si algún día quieres
-  también el respaldo `/.well-known/autoconfig/...` en el apex, hay que publicar el sitio ahí.
-- Límites de Let's Encrypt: por dominio registrado y semana. 7 nombres no es problema.
-- El respaldo `https://<dominio>/.well-known/autoconfig/mail/config-v1.1.xml` ya está en el repo para
-  el día que algún apex se publique; Thunderbird consulta primero `autoconfig.<dominio>`.
-- **Si alguno de los dominios es alias de otro en MXroute** (recibe correo pero no tiene buzones
-  propios), el usuario de autenticación es el del dominio principal. Se corrige en `domains.js` con
-  `loginTemplate: "%EMAILLOCALPART%@taskeplusholding.com"`; el resto no cambia. Se comprueba
-  intentando iniciar sesión con un buzón de ese dominio.
+- El respaldo `https://taskeplusholding.com/.well-known/autoconfig/mail/config-v1.1.xml` está en el
+  repo, pero el apex no tiene registro A (dominio solo de correo), así que esa ruta no existe. Da
+  igual: Thunderbird consulta primero `autoconfig.<dominio>`.
+- Si algún día este dominio resultara **alias** de otro en MXroute (recibe correo pero no tiene
+  buzones propios), el usuario de autenticación es el del dominio principal. Se arregla en
+  `domains.js` con `loginTemplate: "%EMAILLOCALPART%@otrodominio.com"` y un `node scripts/build.mjs`.
+- Para otro dominio (plan futuro): repo nuevo con su propia GitHub Page, cambiar la entrada de
+  `domains.js` y el archivo `CNAME`. El resto es idéntico.

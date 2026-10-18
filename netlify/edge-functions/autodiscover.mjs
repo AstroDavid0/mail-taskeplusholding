@@ -36,54 +36,6 @@ const DOMAINS = [
       "port": 465,
       "socket": "SSL"
     }
-  },
-  {
-    "domain": "taskeplusholdingllc.com",
-    "displayName": "Task Eplus Holding LLC",
-    "displayShortName": "Task Eplus LLC",
-    "aliases": [],
-    "imap": {
-      "host": "chocobo.mxrouting.net",
-      "port": 993,
-      "socket": "SSL"
-    },
-    "smtp": {
-      "host": "chocobo.mxrouting.net",
-      "port": 465,
-      "socket": "SSL"
-    }
-  },
-  {
-    "domain": "epluservices.com",
-    "displayName": "Eplus Services",
-    "displayShortName": "Eplus",
-    "aliases": [],
-    "imap": {
-      "host": "chocobo.mxrouting.net",
-      "port": 993,
-      "socket": "SSL"
-    },
-    "smtp": {
-      "host": "chocobo.mxrouting.net",
-      "port": 465,
-      "socket": "SSL"
-    }
-  },
-  {
-    "domain": "vencox.com",
-    "displayName": "Vencox",
-    "displayShortName": "Vencox",
-    "aliases": [],
-    "imap": {
-      "host": "chocobo.mxrouting.net",
-      "port": 993,
-      "socket": "SSL"
-    },
-    "smtp": {
-      "host": "chocobo.mxrouting.net",
-      "port": 465,
-      "socket": "SSL"
-    }
   }
 ];
 

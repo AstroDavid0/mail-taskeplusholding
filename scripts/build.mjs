@@ -130,7 +130,7 @@ async function main() {
     );
   }
   console.log(`\nGitHub Pages sirve solo: https://autoconfig.${PRIMARY_DOMAIN}/`);
-  console.log("El resto de dominios necesita la edge function (Netlify).");
+  console.log("Autodiscover (POST) necesita la edge function en Netlify.");
 }
 
 main().catch((error) => {

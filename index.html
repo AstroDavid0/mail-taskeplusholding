@@ -208,7 +208,7 @@
   </section>
 
   <footer>
-    <p>Sitio estático en GitHub Pages (un dominio) + endpoint Autodiscover en Netlify (todos los dominios). Fuente de verdad: <code>domains.js</code>; los archivos derivados se regeneran con <code>node scripts/build.mjs</code>.</p>
+    <p>Sitio estático de <code>taskeplusholding.com</code> en GitHub Pages. Fuente de verdad: <code>domains.js</code>; los archivos derivados se regeneran con <code>node scripts/build.mjs</code>. Para otro dominio se clona el repo y se cambia esa única entrada.</p>
   </footer>
 
 </div>
@@ -286,7 +286,10 @@
 
     const nota = document.createElement('p');
     nota.className = 'nota';
-    nota.textContent = `GitHub Pages sirve solo autoconfig.${PRIMARY_DOMAIN}. El resto de dominios y la ruta de Autodiscover los sirve la edge function (Netlify) con el mismo contenido.`;
+    nota.textContent =
+      `Autoconfig lo sirve GitHub Pages en autoconfig.${PRIMARY_DOMAIN}. ` +
+      'Autodiscover necesita un endpoint que acepte POST (GitHub Pages responde 405); ' +
+      'mientras no esté publicado, Outlook y Windows Mail se configuran a mano con la sección 01.';
     endpoints.append(nota);
   }
 
@@ -307,6 +310,9 @@
     option.textContent = '@' + cfg.domain;
     select.append(option);
   }
+
+  // Con un solo dominio el selector sobra.
+  if (DOMAINS.length <= 1) select.hidden = true;
 
   const esApple = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
