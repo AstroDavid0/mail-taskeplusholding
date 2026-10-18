@@ -1,0 +1,37 @@
+# Netlify (raíz del repo) — publica el endpoint dinámico de Autodiscover.
+#
+# Por qué: Outlook y Apple Mail hacen POST a
+#   https://autodiscover.taskeplusholding.com/autodiscover/autodiscover.xml
+# y GitHub Pages contesta 405 a POST. Netlify Edge Functions sí acepta POST.
+#
+# Puesta en marcha (5 minutos):
+#   1. Netlify -> Add new site -> Import an existing project -> este repo.
+#   2. Build command: (vacío)   Publish directory: .
+#   3. Domain management -> Add a domain -> autodiscover.taskeplusholding.com
+#   4. DNS (Namecheap): CNAME autodiscover -> <tu-sitio>.netlify.app
+#   5. Netlify emite el certificado TLS solo (Let's Encrypt).
+#
+# Verificación:
+#   curl -s -X POST https://autodiscover.taskeplusholding.com/autodiscover/autodiscover.xml \
+#     -H 'Content-Type: text/xml' \
+#     -d '<Autodiscover><Request><EMailAddress>ana@taskeplusholding.com</EMailAddress></Request></Autodiscover>'
+
+[build]
+  publish = "."
+
+[[edge_functions]]
+  path = "/autodiscover/autodiscover.xml"
+  function = "autodiscover"
+
+[[edge_functions]]
+  path = "/autodiscover"
+  function = "autodiscover"
+
+[[edge_functions]]
+  path = "/mail/config-v1.1.xml"
+  function = "autodiscover"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"

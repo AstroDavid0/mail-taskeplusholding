@@ -1,0 +1,12 @@
+{
+  "name": "mail-taskeplusholding",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Configuración pública de correo (autoconfig/autodiscover) para los dominios en MXroute",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check",
+    "inspect": "node scripts/inspect-domain.mjs"
+  }
+}

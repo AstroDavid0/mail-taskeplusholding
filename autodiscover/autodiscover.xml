@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <!-- Archivo GENERADO por scripts/build.mjs desde domains.js. No editar a mano.
+       Estático: sirve a clientes que consultan con GET. Outlook usa POST y
+       necesita la edge function (GitHub Pages responde 405 a POST). -->
+<Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
+  <Response xmlns="http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a">
+    <User>
+      <DisplayName>Task Eplus Holding</DisplayName>
+    </User>
+    <Account>
+      <AccountType>email</AccountType>
+      <Action>settings</Action>
+      <Protocol>
+        <Type>IMAP</Type>
+        <Server>chocobo.mxrouting.net</Server>
+        <Port>993</Port>
+        <SSL>on</SSL>
+        <Encryption>SSL</Encryption>
+        <SPA>off</SPA>
+        <AuthRequired>on</AuthRequired>
+        <TTL>1</TTL>
+      </Protocol>
+      <Protocol>
+        <Type>SMTP</Type>
+        <Server>chocobo.mxrouting.net</Server>
+        <Port>465</Port>
+        <SSL>on</SSL>
+        <Encryption>SSL</Encryption>
+        <SPA>off</SPA>
+        <AuthRequired>on</AuthRequired>
+        <UsePOPAuth>off</UsePOPAuth>
+        <SMTPLast>off</SMTPLast>
+        <TTL>1</TTL>
+      </Protocol>
+    </Account>
+  </Response>
+</Autodiscover>

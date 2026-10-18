@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Correo empresarial · Configuración automática</title>
+<meta name="description" content="Ajustes de conexión y perfiles automáticos para configurar el correo en Thunderbird, Outlook, Apple Mail, Android y más.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --ink: #14161c;
+    --muted: #5b6270;
+    --line: #e3e6ee;
+    --accent: #2f5fe0;
+    --accent-ink: #ffffff;
+    --ok: #147a4b;
+    --warn: #8a5a00;
+    --code: #f1f3f9;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1117;
+      --card: #171a22;
+      --ink: #e9ecf4;
+      --muted: #a0a8b8;
+      --line: #262b36;
+      --accent: #6f95ff;
+      --accent-ink: #0b1020;
+      --ok: #4ad295;
+      --warn: #f0b74a;
+      --code: #10131a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    padding: 32px 20px 64px;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; }
+  header h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); margin: 0 0 6px; letter-spacing: -.02em; }
+  header p { margin: 0; color: var(--muted); }
+  .badge {
+    display: inline-block; margin-top: 14px; padding: 4px 10px; border-radius: 999px;
+    background: var(--code); color: var(--muted); font-size: .8rem; border: 1px solid var(--line);
+  }
+  section { margin-top: 34px; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; letter-spacing: .01em; }
+  h2 .num { color: var(--muted); font-weight: 500; margin-right: 8px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .bloque + .bloque { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .bloque h3 { margin: 0 0 10px; font-size: .98rem; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .bloque h3 .nombre { color: var(--muted); font-weight: 400; font-size: .86rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  th, td { text-align: left; padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; width: 38%; }
+  tr:last-child th, tr:last-child td { border-bottom: 0; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  code { background: var(--code); padding: 1px 6px; border-radius: 6px; word-break: break-word; }
+  a { color: var(--accent); }
+  label { display: block; font-size: .9rem; color: var(--muted); margin-bottom: 6px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  input[type=email], select {
+    padding: 11px 13px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 1rem;
+  }
+  input[type=email] { flex: 1 1 260px; min-width: 0; }
+  select { flex: 0 0 auto; max-width: 100%; }
+  input[type=email]:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button, .btn {
+    padding: 11px 18px; border-radius: 10px; border: 1px solid transparent;
+    background: var(--accent); color: var(--accent-ink); font-size: .95rem; font-weight: 600;
+    cursor: pointer; text-decoration: none; display: inline-block;
+  }
+  button:hover, .btn:hover { filter: brightness(1.07); }
+  .btn-ghost { background: transparent; color: var(--accent); border-color: var(--line); }
+  .msg { margin-top: 12px; font-size: .92rem; min-height: 1.4em; color: var(--muted); }
+  .msg[data-state=ok] { color: var(--ok); }
+  .msg[data-state=error] { color: #d14343; }
+  .msg[data-state=warn] { color: var(--warn); }
+  #resultado { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+  #resultado h3 { margin: 0 0 8px; font-size: .98rem; }
+  ol, ul { margin: 8px 0 0; padding-left: 20px; }
+  li { margin: 5px 0; }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: var(--muted); font-size: .9rem; }
+  textarea {
+    width: 100%; margin-top: 8px; min-height: 130px; padding: 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--code); color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; resize: vertical;
+  }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); }
+  .cliente { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+  .cliente h3 { margin: 0 0 4px; font-size: .98rem; }
+  .cliente p { margin: 0 0 8px; color: var(--muted); font-size: .9rem; }
+  .cliente ul { font-size: .9rem; color: var(--ink); }
+  .estado { font-size: .78rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .estado.si { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+  .estado.no { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+  .nota { color: var(--muted); font-size: .88rem; margin: 12px 0 0; }
+  footer { margin-top: 44px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 16px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Correo empresarial</h1>
+    <p>Configuración automática de las cuentas de correo en cualquier gestor.</p>
+    <div class="badge" id="badge">Cargando…</div>
+  </header>
+
+  <section aria-labelledby="t-ajustes">
+    <h2 id="t-ajustes"><span class="num">01</span>Ajustes de conexión</h2>
+    <div class="card" id="ajustes"></div>
+  </section>
+
+  <section aria-labelledby="t-apple">
+    <h2 id="t-apple"><span class="num">02</span>Apple · iPhone, iPad y Mac</h2>
+    <div class="card">
+      <p class="nota" style="margin-top:0">Genera un perfil de configuración (<code>.mobileconfig</code>) con tu dirección: la cuenta queda lista sin escribir servidores. El correo se procesa solo en tu dispositivo, no se envía a ningún servidor.</p>
+      <form id="form-perfil" novalidate>
+        <label for="email">Tu dirección de correo</label>
+        <div class="row">
+          <select id="dominio" aria-label="Dominio del correo"></select>
+          <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
+                 placeholder="nombre@dominio.com" spellcheck="false" required>
+          <button type="submit">Generar perfil de Apple</button>
+        </div>
+      </form>
+      <p class="msg" id="msg" role="status" aria-live="polite"></p>
+
+      <div id="resultado" hidden>
+        <h3>Perfil listo</h3>
+        <div class="row">
+          <a class="btn" id="btn-descargar" href="#" download>Descargar perfil</a>
+          <a class="btn btn-ghost" id="btn-abrir" href="#" target="_blank" rel="noopener">Abrir en este dispositivo</a>
+        </div>
+        <ol id="pasos-ios" hidden>
+          <li><strong>iPhone/iPad:</strong> pulsa «Abrir en este dispositivo» y luego «Permitir».</li>
+          <li>Ve a <em>Ajustes → General → VPN y gestión de dispositivos</em> y toca el perfil descargado.</li>
+          <li>Pulsa <em>Instalar</em>, acepta y escribe el código del dispositivo.</li>
+          <li>Abre <em>Mail</em> y teclea la contraseña del buzón cuando la pida.</li>
+        </ol>
+        <ol id="pasos-mac" hidden>
+          <li><strong>Mac:</strong> descarga el archivo y haz doble clic.</li>
+          <li>Se abre <em>Ajustes del Sistema → General → Perfiles</em>; pulsa <em>Instalar</em>.</li>
+          <li>Introduce la contraseña del buzón cuando Mail la solicite.</li>
+        </ol>
+        <details>
+          <summary>Ver el XML del perfil (para copiar o firmar)</summary>
+          <textarea id="salida" readonly spellcheck="false" aria-label="Contenido del perfil"></textarea>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-clientes">
+    <h2 id="t-clientes"><span class="num">03</span>Qué ocurre en cada gestor</h2>
+    <div class="grid">
+      <div class="cliente">
+        <h3>Thunderbird · K-9 · FairEmail</h3>
+        <p>Escribes el email y la contraseña: los datos llegan solos. <span class="estado si">automático</span></p>
+        <ul>
+          <li>Consulta <code>autoconfig.&lt;dominio&gt;/mail/config-v1.1.xml</code>.</li>
+          <li>Si no, cae en <code>/.well-known/autoconfig/mail/config-v1.1.xml</code>.</li>
+        </ul>
+      </div>
+      <div class="cliente">
+        <h3>Outlook · Windows Mail · eM Client</h3>
+        <p>Usa Autodiscover (POST a <code>autodiscover.&lt;dominio&gt;</code>). <span class="estado no">requiere endpoint</span></p>
+        <ul>
+          <li>Con el endpoint publicado: automático.</li>
+          <li>Si no: ajustes manuales de arriba (30 segundos).</li>
+        </ul>
+      </div>
+      <div class="cliente">
+        <h3>Apple Mail</h3>
+        <p>Perfil <code>.mobileconfig</code> generado arriba. <span class="estado si">automático</span></p>
+        <ul>
+          <li>Instalación en dos toques, sin datos que escribir.</li>
+          <li>También intenta Autodiscover si el endpoint existe.</li>
+        </ul>
+      </div>
+      <div class="cliente">
+        <h3>Gmail (Android/iOS) · Samsung Mail</h3>
+        <p>Solo configuración manual. <span class="estado no">manual</span></p>
+        <ul>
+          <li>Servidores y puertos de la sección 01.</li>
+          <li>Usuario siempre la dirección completa.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-avanzado">
+    <h2 id="t-avanzado"><span class="num">04</span>Puntos de descubrimiento publicados</h2>
+    <div class="card" id="endpoints"></div>
+  </section>
+
+  <footer>
+    <p>Sitio estático en GitHub Pages (un dominio) + endpoint Autodiscover en Netlify (todos los dominios). Fuente de verdad: <code>domains.js</code>; los archivos derivados se regeneran con <code>node scripts/build.mjs</code>.</p>
+  </footer>
+
+</div>
+
+<script type="module">
+  import { DOMAINS, PRIMARY_DOMAIN, findDomainByEmail } from './domains.js';
+  import { buildProfile, profileFileName, isValidEmail } from './assets/profile.js';
+
+  /* ---------- datos por dominio ---------- */
+  const badge = document.getElementById('badge');
+  const ajustes = document.getElementById('ajustes');
+  const endpoints = document.getElementById('endpoints');
+  const select = document.getElementById('dominio');
+
+  const fila = (etiqueta, valor, mono = true) => {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th');
+    th.textContent = etiqueta;
+    const td = document.createElement('td');
+    if (mono) td.className = 'mono';
+    td.textContent = valor;
+    tr.append(th, td);
+    return tr;
+  };
+
+  if (!DOMAINS.length) {
+    badge.textContent = 'Sin dominios configurados';
+  } else {
+    const total = DOMAINS.length;
+    badge.textContent = total === 1
+      ? `Servidores: ${DOMAINS[0].imap.host} · IMAP ${DOMAINS[0].imap.port} ${DOMAINS[0].imap.socket} · SMTP ${DOMAINS[0].smtp.port} ${DOMAINS[0].smtp.socket}`
+      : `${total} dominios publicados · servidor ${DOMAINS[0].imap.host}`;
+
+    for (const cfg of DOMAINS) {
+      const bloque = document.createElement('div');
+      bloque.className = 'bloque';
+
+      const titulo = document.createElement('h3');
+      titulo.append('@' + cfg.domain);
+      const nombre = document.createElement('span');
+      nombre.className = 'nombre';
+      nombre.textContent = cfg.displayName;
+      titulo.append(nombre);
+      if (cfg.aliases && cfg.aliases.length) {
+        const alias = document.createElement('span');
+        alias.className = 'estado';
+        alias.textContent = 'alias: ' + cfg.aliases.join(', ');
+        titulo.append(alias);
+      }
+
+      const tabla = document.createElement('table');
+      const tb = document.createElement('tbody');
+      tb.append(
+        fila('Correo', 'tu-nombre@' + cfg.domain),
+        fila('Usuario (IMAP y SMTP)', 'la dirección completa, incluido @' + cfg.domain),
+        fila('Servidor entrante (IMAP)', cfg.imap.host),
+        fila('Puerto / seguridad IMAP', `${cfg.imap.port} · ${cfg.imap.socket}`),
+        fila('Servidor saliente (SMTP)', cfg.smtp.host),
+        fila('Puerto / seguridad SMTP', `${cfg.smtp.port} · ${cfg.smtp.socket}`),
+        fila('Autenticación', 'Contraseña del buzón, sobre conexión cifrada', false),
+      );
+      tabla.append(tb);
+      bloque.append(titulo, tabla);
+      ajustes.append(bloque);
+
+      const tablaEp = document.createElement('table');
+      const tbEp = document.createElement('tbody');
+      tbEp.append(
+        fila('Autoconfig (Mozilla)', `https://autoconfig.${cfg.domain}/mail/config-v1.1.xml`),
+        fila('Autodiscover (POX)', `https://autodiscover.${cfg.domain}/autodiscover/autodiscover.xml`),
+      );
+      tablaEp.append(tbEp);
+      endpoints.append(tablaEp);
+    }
+
+    const nota = document.createElement('p');
+    nota.className = 'nota';
+    nota.textContent = `GitHub Pages sirve solo autoconfig.${PRIMARY_DOMAIN}. El resto de dominios y la ruta de Autodiscover los sirve la edge function (Netlify) con el mismo contenido.`;
+    endpoints.append(nota);
+  }
+
+  /* ---------- generador de perfil Apple ---------- */
+  const form = document.getElementById('form-perfil');
+  const emailInput = document.getElementById('email');
+  const msg = document.getElementById('msg');
+  const resultado = document.getElementById('resultado');
+  const descargar = document.getElementById('btn-descargar');
+  const abrir = document.getElementById('btn-abrir');
+  const salida = document.getElementById('salida');
+  const pasosIos = document.getElementById('pasos-ios');
+  const pasosMac = document.getElementById('pasos-mac');
+
+  for (const cfg of DOMAINS) {
+    const option = document.createElement('option');
+    option.value = cfg.domain;
+    option.textContent = '@' + cfg.domain;
+    select.append(option);
+  }
+
+  const esApple = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const esMac = /Macintosh/.test(navigator.userAgent);
+
+  let blobUrl = null;
+
+  select.addEventListener('change', () => {
+    const local = (emailInput.value.split('@')[0] || '').trim();
+    emailInput.value = local ? local + '@' + select.value : '';
+    emailInput.focus();
+  });
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const email = emailInput.value.trim();
+
+    if (!isValidEmail(email)) {
+      msg.dataset.state = 'error';
+      msg.textContent = 'Escribe una dirección de correo válida.';
+      resultado.hidden = true;
+      return;
+    }
+
+    const cfg = findDomainByEmail(email);
+    if (!cfg) {
+      msg.dataset.state = 'error';
+      const conocidos = DOMAINS.map((d) => '@' + d.domain).join(', ') || 'ninguno';
+      msg.textContent = `Ese dominio no está publicado aquí. Dominios disponibles: ${conocidos}.`;
+      resultado.hidden = true;
+      return;
+    }
+
+    const xml = buildProfile(email);
+    if (!xml) {
+      msg.dataset.state = 'error';
+      msg.textContent = 'No se pudo generar el perfil para ese dominio.';
+      resultado.hidden = true;
+      return;
+    }
+
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    const blob = new Blob([xml], { type: 'application/x-apple-aspen-config' });
+    blobUrl = URL.createObjectURL(blob);
+
+    descargar.href = blobUrl;
+    descargar.download = profileFileName(email);
+    abrir.href = blobUrl;
+
+    salida.value = xml;
+    resultado.hidden = false;
+    pasosIos.hidden = !esApple;
+    pasosMac.hidden = !esMac;
+
+    const esDelDominio = email.split('@')[1].toLowerCase().replace(/\.$/, "");
+    msg.dataset.state = cfg.domain === esDelDominio ? 'ok' : 'warn';
+    msg.textContent = cfg.domain === esDelDominio
+      ? `Perfil generado para ${email}.`
+      : `Perfil generado para ${email} usando la configuración de @${cfg.domain}.`;
+
+    if (esApple || esMac) {
+      resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+</script>
+</body>
+</html>

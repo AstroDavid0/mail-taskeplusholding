@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+  <!-- Archivo GENERADO por scripts/build.mjs desde domains.js. No editar a mano. -->
 <clientConfig version="1.1">
   <emailProvider id="taskeplusholding.com">
     <domain>taskeplusholding.com</domain>
     <displayName>Task Eplus Holding</displayName>
     <displayShortName>Task Eplus</displayShortName>
-    
     <incomingServer type="imap">
       <hostname>chocobo.mxrouting.net</hostname>
       <port>993</port>
@@ -12,7 +12,6 @@
       <authentication>password-cleartext</authentication>
       <username>%EMAILADDRESS%</username>
     </incomingServer>
-    
     <outgoingServer type="smtp">
       <hostname>chocobo.mxrouting.net</hostname>
       <port>465</port>
@@ -20,5 +19,9 @@
       <authentication>password-cleartext</authentication>
       <username>%EMAILADDRESS%</username>
     </outgoingServer>
+    <documentation url="https://autoconfig.taskeplusholding.com/">
+      <descr lang="es">Configuración automática del correo de Task Eplus Holding</descr>
+      <descr lang="en">Task Eplus Holding automatic mail setup</descr>
+    </documentation>
   </emailProvider>
 </clientConfig>
